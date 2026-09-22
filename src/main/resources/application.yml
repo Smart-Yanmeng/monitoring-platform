@@ -1,0 +1,35 @@
+app:
+  security:
+    jwt:
+      secret: monitoring-platform-default-jwt-secret-please-change-in-production
+      expiration-minutes: 120
+
+spring:
+  application:
+    name: monitoring-platform
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/monitoring
+    username: monitoring
+    password: Monitor@2026
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
