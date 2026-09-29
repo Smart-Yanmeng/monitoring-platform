@@ -1,0 +1,18 @@
+# 权重与数据集不入库
+.venv/
+weights/
+runs/
+data/raw/
+data/manifests/
+snapshots/
+__pycache__/
+*.pt
+*.onnx
+*.onnxrun
+
+# 生成的特征/切片/实验产物（非源码）
+data/clips/
+data/keypoints/
+data/checkpoints/
+*.bak
+data/__pycache__/

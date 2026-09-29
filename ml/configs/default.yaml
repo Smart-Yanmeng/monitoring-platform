@@ -1,0 +1,42 @@
+# 打架识别模块配置
+
+data:
+  rwf2000_repo: https://github.com/mchengny/RWF2000-Video-Database-for-Violence-Detection
+  raw_dir: data/raw/RWF2000
+  # 多数据集合并: RWF2000(2000) + hockey(1000) + rlvs(1500) + surv(300) = 4800
+  manifest: data/manifests/all_train.csv
+  manifests_extra:
+    hockey: data/manifests/hockey.csv
+    rlvs: data/manifests/rlvs.csv
+    surv: data/manifests/surv.csv
+
+model:
+  pose_weights: yolo11s-pose.pt  # YOLO-Pose 感知前端 (方案1)
+  num_frames: 32                 # 骨架时序滑动窗口帧数
+  k: 2                           # 每帧保留人数 (top-K)
+  keypoints: data/keypoints      # 离线抽取的关键点目录
+  checkpoint: data/checkpoints/fight_lstm.pt   # 方案1 骨架权重
+  # 方案2 RGB: YOLO 裁剪人体 + 2D CNN(ImageNet 预训练) + 时序池化
+  rgb_checkpoint: data/checkpoints/fight_rgb_resnet18.pt
+  rgb_backbone: resnet18
+  rgb_num_frames: 16
+  rgb_res: 160
+  # 时序分类头: lstm | tcn
+  temporal: lstm
+  # 集成: skeleton | rgb | ensemble
+  mode: ensemble
+  skeleton_weight: 0.4           # 集成时骨架分支权重(其余给 RGB), 多数据集实测最优
+
+train:
+  epochs: 40
+  batch_size: 128      # 骨骼序列模型极小, 16G 显存 batch 128 轻松
+  lr: 1.0e-3
+  hidden: 96
+  dropout: 0.4
+  weight_decay: 1.0e-3
+  label_smooth: 0.05
+
+inference:
+  sample_fps: 5        # 抽帧频率
+  threshold: 0.5       # 打架判定阈值(4800样本集成 w_sk=0.4 在 0.5 最优: F1 0.926)
+  backend_alarm_url: http://localhost:8080/api/alarms

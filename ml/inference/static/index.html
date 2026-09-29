@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>打架识别 · 视频检测</title>
+<style>
+  :root { --bg:#0f1420; --card:#1a2130; --line:#2a3346; --txt:#e6ebf2; --sub:#8b98ad;
+          --ok:#2ecc71; --bad:#e74c3c; --warn:#f1c40f; --accent:#3b82f6; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt);
+         font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  .wrap { max-width:860px; margin:0 auto; padding:32px 20px 64px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  .sub { color:var(--sub); font-size:13px; margin-bottom:24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px;
+          padding:22px; margin-bottom:20px; }
+  .drop { border:2px dashed var(--line); border-radius:12px; padding:38px 20px;
+          text-align:center; cursor:pointer; transition:.2s; }
+  .drop:hover, .drop.on { border-color:var(--accent); background:#141c2b; }
+  .drop b { color:var(--accent); }
+  .drop p { margin:8px 0 0; color:var(--sub); font-size:12px; }
+  video { width:100%; border-radius:10px; background:#000; display:block; }
+  .file { font-size:13px; color:var(--sub); margin-top:12px; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:9px;
+           padding:12px 22px; font-size:15px; font-weight:600; cursor:pointer; width:100%;
+           margin-top:16px; transition:.2s; }
+  button:hover:not(:disabled) { filter:brightness(1.12); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .verdict { text-align:center; padding:26px 0 8px; }
+  .v-big { font-size:52px; font-weight:800; line-height:1; }
+  .v-txt { font-size:20px; font-weight:700; margin-top:10px; }
+  .fight { color:var(--bad); } .nofight { color:var(--ok); }
+  .bar { height:10px; border-radius:6px; background:#0b0f18; overflow:hidden; margin:18px 0 8px; }
+  .bar > i { display:block; height:100%; border-radius:6px; transition:width .6s ease; }
+  .branches { display:flex; gap:12px; margin-top:16px; }
+  .branch { flex:1; background:#131a27; border:1px solid var(--line); border-radius:10px;
+            padding:12px 14px; }
+  .branch span { display:block; font-size:12px; color:var(--sub); margin-bottom:6px; }
+  .branch b { font-size:20px; }
+  .spinner { width:34px; height:34px; border:3px solid var(--line); border-top-color:var(--accent);
+             border-radius:50%; animation:spin .8s linear infinite; margin:22px auto 6px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .hide { display:none; }
+  .err { color:var(--bad); font-size:14px; margin-top:14px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>打架识别 · 视频检测</h1>
+  <div class="sub">上传一段视频，模型判定是否存在打架行为（骨架 + RGB 集成）</div>
+
+  <div class="card">
+    <div id="drop" class="drop">
+      <div>点击选择视频，或拖拽到此处</div>
+      <p>支持 mp4 / avi / mov / mkv，建议时长 2 秒以上</p>
+      <input id="file" type="file" accept="video/*" class="hide" />
+    </div>
+    <div id="fileInfo" class="file"></div>
+    <video id="preview" class="hide" controls muted></video>
+    <button id="run" disabled>开始检测</button>
+  </div>
+
+  <div id="resultCard" class="card hide">
+    <div id="loading" class="hide"><div class="spinner"></div>
+      <div class="sub" style="text-align:center">分析中…</div></div>
+    <div id="output" class="hide"></div>
+  </div>
+</div>
+
+<script>
+const API = '';  // 同源部署
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+const fileInfo = document.getElementById('fileInfo');
+const preview = document.getElementById('preview');
+const runBtn = document.getElementById('run');
+const resultCard = document.getElementById('resultCard');
+const loading = document.getElementById('loading');
+const output = document.getElementById('output');
+let chosen = null;
+
+drop.onclick = () => fileInput.click();
+['dragenter','dragover'].forEach(e => drop.addEventListener(e, ev => {
+  ev.preventDefault(); drop.classList.add('on');
+}));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => {
+  ev.preventDefault(); drop.classList.remove('on');
+}));
+drop.addEventListener('drop', ev => {
+  const f = ev.dataTransfer.files[0];
+  if (f) pick(f);
+});
+fileInput.onchange = () => { if (fileInput.files[0]) pick(fileInput.files[0]); };
+
+function pick(f) {
+  chosen = f;
+  fileInfo.textContent = `${f.name}  ·  ${(f.size/1024/1024).toFixed(1)} MB`;
+  preview.src = URL.createObjectURL(f);
+  preview.classList.remove('hide');
+  runBtn.disabled = false;
+  resultCard.classList.add('hide');
+}
+
+runBtn.onclick = async () => {
+  if (!chosen) return;
+  runBtn.disabled = true; runBtn.textContent = '检测中…';
+  resultCard.classList.remove('hide');
+  loading.classList.remove('hide'); output.classList.add('hide');
+
+  const fd = new FormData();
+  fd.append('file', chosen);
+  try {
+    const r = await fetch(API + '/api/detect', { method:'POST', body: fd });
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + (await r.text()));
+    render(await r.json());
+  } catch (e) {
+    output.innerHTML = `<div class="err">检测失败：${e.message}</div>`;
+    output.classList.remove('hide');
+  } finally {
+    loading.classList.add('hide');
+    runBtn.disabled = false; runBtn.textContent = '开始检测';
+  }
+};
+
+function pct(v) { return (v * 100).toFixed(1) + '%'; }
+
+function render(d) {
+  const isFight = d.fight;
+  const color = isFight ? 'var(--bad)' : 'var(--ok)';
+  const cls = isFight ? 'fight' : 'nofight';
+  const branch = (name, v) => v == null ? '' : `
+    <div class="branch"><span>${name}</span>
+      <b class="${v >= d.threshold ? 'fight' : 'nofight'}">${pct(v)}</b></div>`;
+  output.innerHTML = `
+    <div class="verdict">
+      <div class="v-big ${cls}">${pct(d.score)}</div>
+      <div class="v-txt ${cls}">${isFight ? '⚠ 检测到打架' : '✓ 未检测到打架'}</div>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100, d.score*100)}%;background:${color}"></i></div>
+    <div class="sub" style="text-align:center;margin-top:4px">
+      判定阈值 ${pct(d.threshold)} · 融合后打架概率 ${pct(d.score)}</div>
+    <div class="branches">
+      ${branch('骨架 Bi-LSTM', d.skeleton_score)}
+      ${branch('RGB ResNet18', d.rgb_score)}
+    </div>
+    <div class="sub" style="text-align:center;margin-top:14px">
+      分析帧数 ${d.frames} · 耗时 ${d.elapsed_ms} ms</div>`;
+  output.classList.remove('hide');
+}
+</script>
+</body>
+</html>
