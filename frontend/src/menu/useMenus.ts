@@ -10,6 +10,11 @@ const BUILTIN_MENUS: Menu[] = [
   { id: 'm-users', name: '人员管理', path: '/users', icon: '👤', parentId: null, order: 3 },
   { id: 'm-alarms', name: '报警管理', path: '/alarms', icon: '🚨', parentId: null, order: 4 },
   { id: 'm-recycle', name: '回收站管理', path: '/recycle', icon: '🗑️', parentId: null, order: 5 },
+  { id: 'm-regions', name: '地区管理', path: '/regions', icon: '📍', parentId: null, order: 6 },
+  { id: 'm-devices', name: '设备管理', path: '/devices', icon: '🎥', parentId: null, order: 7 },
+  { id: 'm-models', name: '模型管理', path: '/models', icon: '🧠', parentId: null, order: 8 },
+  { id: 'm-ai-status', name: 'AI服务状态', path: '/ai-status', icon: '🤖', parentId: null, order: 9 },
+  { id: 'm-video-detect', name: '视频识别', path: '/video-detect', icon: '🎬', parentId: null, order: 10 },
 ]
 
 // 已从默认菜单移除的历史内置 id（加载时清除，避免残留）

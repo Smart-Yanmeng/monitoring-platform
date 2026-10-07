@@ -15,6 +15,20 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // 必须用精确路径：写成 '/ai' 会前缀匹配误劫持前端路由 /ai-status
+      '/ai/detect': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/ai/preview': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      // 摄像头 MJPEG 实时画面
+      '/ai/camera': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 })

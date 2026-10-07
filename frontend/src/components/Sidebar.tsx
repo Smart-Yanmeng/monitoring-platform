@@ -64,6 +64,63 @@ function TrashIcon() {
   )
 }
 
+function MapIcon() {
+  return (
+    <SvgIcon>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </SvgIcon>
+  )
+}
+
+function DeviceIcon() {
+  return (
+    <SvgIcon>
+      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z" />
+      <circle cx="12" cy="13" r="3" />
+    </SvgIcon>
+  )
+}
+
+function ModelIcon() {
+  return (
+    <SvgIcon>
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <rect x="9" y="9" width="6" height="6" rx="1" />
+      <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2" />
+    </SvgIcon>
+  )
+}
+
+function PulseIcon() {
+  return (
+    <SvgIcon>
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </SvgIcon>
+  )
+}
+
+function ScanIcon() {
+  return (
+    <SvgIcon>
+      <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+      <circle cx="12" cy="12" r="1" />
+      <path d="M18.9 12.3a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.89 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.89 0" />
+    </SvgIcon>
+  )
+}
+
+function MenuIcon() {
+  return (
+    <SvgIcon>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </SvgIcon>
+  )
+}
+
 function DotIcon() {
   return (
     <SvgIcon>
@@ -79,6 +136,12 @@ const ICON_BY_PATH: Record<string, () => ReactElement> = {
   '/users': UsersIcon,
   '/alarms': BellIcon,
   '/recycle': TrashIcon,
+  '/regions': MapIcon,
+  '/devices': DeviceIcon,
+  '/models': ModelIcon,
+  '/ai-status': PulseIcon,
+  '/video-detect': ScanIcon,
+  '/menu': MenuIcon,
 }
 
 export default function Sidebar({ menus }: { menus: Menu[] }) {

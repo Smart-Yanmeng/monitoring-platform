@@ -50,10 +50,30 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
+        <!-- RSA 加密载荷(EncryptedPayloadService)用到的 JSON 解析 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- 纯 Java 推理：ONNX Runtime（加载 .onnx 权重，无需 Python） -->
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.19.2</version>
+        </dependency>
+
+        <!-- 视频/RTSP 解码：JavaCV（捆绑 ffmpeg 原生库，用于抽帧） -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.10</version>
         </dependency>
     </dependencies>
 

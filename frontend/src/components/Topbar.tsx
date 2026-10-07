@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Me } from '../auth'
+import Notifications from './Notifications'
 
 type Props = {
   title: string
@@ -61,6 +62,7 @@ export default function Topbar({ title, me, onLogout }: Props) {
         </div>
 
         <div className="topbar-right">
+          <Notifications />
           {me ? (
             <div className="topbar-user-wrap" ref={wrapRef}>
               <button

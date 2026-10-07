@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Menu } from '../menu/types'
+import Select from '../components/Select'
 
 type Props = {
   menus: Menu[]
@@ -76,17 +77,14 @@ export default function MenuManage({ menus, addMenu, updateMenu, removeMenu }: P
             value={form.icon}
             onChange={(e) => setForm({ ...form, icon: e.target.value })}
           />
-          <select
+          <Select
             value={form.parentId}
-            onChange={(e) => setForm({ ...form, parentId: e.target.value })}
-          >
-            <option value="">顶级菜单</option>
-            {roots.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setForm({ ...form, parentId: v })}
+            options={[
+              { value: '', label: '顶级菜单' },
+              ...roots.map((r) => ({ value: r.id, label: r.name })),
+            ]}
+          />
           <input
             placeholder="排序"
             value={form.order}

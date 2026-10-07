@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -74,9 +73,18 @@ public class SecurityConfig {
                     "/health",
                     "/error",
                     "/api/auth/register",
-                    "/api/auth/login").permitAll()
+                    "/api/auth/login",
+                    "/api/ai/**",
+                    // AI 推理/转码端点：覆盖 /ai/detect 与 /ai/preview
+                    "/ai/**").permitAll()
                 .anyRequest().authenticated())
-            .httpBasic(Customizer.withDefaults())
+            // 无 HTTP Basic/Bearer 挑战头：401 返回纯 JSON，交给前端路由守卫跳转 /login，
+            // 否则浏览器会因 WWW-Authenticate: Basic 弹出原生登录框
+            .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                response.setStatus(401);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"unauthorized\"}");
+            }))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();

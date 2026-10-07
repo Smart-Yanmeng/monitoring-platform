@@ -40,3 +40,20 @@ logs/
 
 ### IDE / Project data ###
 .codebuddy/
+
+### AI 模型权重（体积大，不入库；用 scripts/export_onnx.py 从 .pt 导出 .onnx） ###
+ai-service/models/*.pt
+ai-service/models/*.onnx
+*.pt
+*.onnx
+
+### Python ###
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+### 测试产物 ###
+frontend/.playwright-cli/
+frontend/*.png

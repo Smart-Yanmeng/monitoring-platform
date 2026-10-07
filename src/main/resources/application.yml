@@ -3,6 +3,21 @@ app:
     jwt:
       secret: monitoring-platform-default-jwt-secret-please-change-in-production
       expiration-minutes: 120
+  ai:
+    api-key: ai-ingest-secret-change-me
+    # ── 纯 Java 实时打架检测配置（ONNX Runtime + JavaCV，不再依赖 Python 服务）──
+    enabled: true
+    # ONNX 权重路径；留空则按「启用模型 .pt」同级推导为 .onnx
+    onnx-path: ""
+    input-size: 640
+    conf-threshold: 0.5
+    fight-class-index: 1          # 模型类别中 violence 的下标（0=non_violence,1=violence）
+    frame-skip: 3                 # 实时拉流每 N 帧推理一次
+    cooldown-seconds: 30          # 同一摄像头两次报警最小间隔
+    poll-interval-seconds: 30     # 重新拉取摄像头列表/启用模型的间隔
+    heartbeat-interval-seconds: 15
+    sample-fps: 5                 # 上传视频抽帧目标帧率
+    max-video-frames: 3000        # 上传视频最大抽帧数（长视频上限）
 
 spring:
   application:
@@ -19,9 +34,17 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 300MB
+      max-request-size: 300MB
 
 server:
   port: 8080
+  error:
+    # 让 ResponseStatusException 的中文原因随响应返回，
+    # 否则前端只能拿到 "400 Bad Request" 而看不到具体校验失败原因
+    include-message: always
 
 management:
   endpoints:

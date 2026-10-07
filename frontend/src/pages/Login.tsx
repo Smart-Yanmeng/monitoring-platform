@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { api, getToken, setToken } from '../auth'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { api } from '../auth'
+import { useAuth } from '../authContext'
 
 type Mode = 'login' | 'register'
 
@@ -62,6 +63,10 @@ function Stars({ count = 45 }: { count?: number }) {
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { token, signIn } = useAuth()
+  // 被路由守卫重定向前的目标页，登录成功后跳回
+  const from = (location.state as { from?: string } | null)?.from ?? '/'
   const [mode, setMode] = useState<Mode>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -69,10 +74,10 @@ export default function Login() {
   const [ok, setOk] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  // 已登录则直接进入仪表盘
+  // 已登录则直接进入系统
   useEffect(() => {
-    if (getToken()) navigate('/', { replace: true })
-  }, [navigate])
+    if (token) navigate(from, { replace: true })
+  }, [token, navigate, from])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,8 +113,8 @@ export default function Login() {
       return
     }
     const data = (await res.json()) as { token: string }
-    setToken(data.token)
-    navigate('/')
+    signIn(data.token)
+    navigate(from, { replace: true })
   }
 
   return (
